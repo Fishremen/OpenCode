@@ -1,0 +1,19 @@
+#$ -S /bin/bash  #规定解释器为bash
+#$ -q honda  #提交任务到honda队列
+#$ -N convert  #作业名称为convert
+#$ -l vf=10G  #请求内存为10G
+#$ -pe honda 10  #请求核数为20
+#$ -cwd  #指定工作路径为提交脚本的路径
+#$ -o convert_jobout  #指定作业输出为convert_jobout文件
+#$ -now y  #设置立即执行
+for ((i=1;i<=7;i++))
+do
+cd mcenp${i}
+mkdir convert
+for inf in *.mol2
+do
+moln=`basename ${inf} .mol2`
+obabel -imol2 ${inf} -opdbqt -O convert/${moln}.pdbqt -r --partialcharge gasteiger #使用openbabel分割、转化、加电荷。
+done
+cd ..
+done
