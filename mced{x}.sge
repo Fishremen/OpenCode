@@ -1,0 +1,31 @@
+#$ -S /bin/bash
+#$ -q honda
+#$ -pe honda 28
+#$ -N mced{x}    # x=组号
+#$ -l vf=32G
+#$ -cwd
+#$ -o mced{x}_jobout  # x
+#$ -now y
+#$ -j y  #合并标准错误和输出文件
+#$ -l hostname=n117.hn.org   #提交到某一节点，每一个作业提交的节点不同，需要另作修改
+mkdir /tmp/yzwang
+mkdir /tmp/yzwang/mcedock   #在根目录下tmp文件夹建立自己的文件夹，这个目录下是固态硬盘，读写速度更快，在该文件下运行作业会更快
+cp -r ~/mcedock/mcenp${x} /tmp/yzwang/mcedock/mcenp${x}   
+cp ~/mcedock/Beta4prot.pdbqt /tmp/yzwang/mcedock
+cp ~/mcedock/prot.conf /tmp/yzwang/mcedock  #拷贝需要的数据到上述建立的文件夹
+wait
+cd /tmp/yzwang/mcedock
+mkdir result{x}  # x
+mkdir log{x}   # x
+for inf in mcenp{x}/convert/*.mol2   
+do
+moln{x}=`basename mcenp{x}/convert/${inf} .mol2`
+touch result{x}/${moln{x}}.pdbqt
+touch log{x}/${moln{x}}.log
+vina --ligand $inf --config prot.conf --out result{x}/${moln{x}}.pdbqt –log log{x}/${moln{x}}.log  #prot.conf文件是Vina的参数文件，输出的结构命名为<分子名>.pdbqt，输出的记录命名为<分子名>.log
+echo $inf >> log{x}/${moln{x}}.log
+done
+wait
+cp -r /tmp/yzwang/mcedock/result{x} ~/mcedock
+cp -r /tmp/yzwang/mcedock/log{x} ~/mcedock  #将result{x}和log{x}两个包含对接结果的文件夹拷贝回自己的目录
+wait
