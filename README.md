@@ -1,0 +1,2 @@
+# OpenCode
+some scripts
